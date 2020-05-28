@@ -134,7 +134,8 @@ class Ant():
                     elif message._id in [Message.ID.RESPONSE_ANT_VERSION,
                                          Message.ID.RESPONSE_CAPABILITIES,
                                          Message.ID.RESPONSE_SERIAL_NUMBER,
-                                         Message.ID.ENABLE_EXT_RX_MESGS]:
+                                         Message.ID.ENABLE_EXT_RX_MESGS,
+                                         Message.ID.UNASSIGN_CHANNEL]:
                         self._events.put(('response', (None, message._id,
                                                        message._data)))
                     # Response (channel)
@@ -230,7 +231,8 @@ class Ant():
     # Ant functions
 
     def unassign_channel(self, channel):
-        pass
+        message = Message(Message.ID.UNASSIGN_CHANNEL, [channel])
+        self.write_message(message)
 
     def assign_channel(self, channel, channelType, networkNumber, ext_assign):
         if ext_assign is None:
