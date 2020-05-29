@@ -36,18 +36,15 @@ NETWORK_KEY= [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
 
 def on_data(data):
     heartrate = data[7]
-    string = "Heartrate: " + str(heartrate) + " [BPM]"
-
-    sys.stdout.write(string)
-    sys.stdout.flush()
-    sys.stdout.write("\b" * len(string))
+    result = {"hbm":heartrate, "rec_time":datetime.datetime.now()}
     if len(data)>8:
-        print(data)
-        deviceNumberLSB = data[9]
-        deviceNumberMSB = data[10]
-        deviceNumber = "{}".format(deviceNumberLSB + (deviceNumberMSB<<8))
-        deviceType = "{}".format(data[11])
-        print('New Device Found: %s of type %s' % (deviceNumber,deviceType))
+        if data[8]==int("0x80",16):
+            deviceNumberLSB = data[9]
+            deviceNumberMSB = data[10]
+            result["device_number"]="{}".format(deviceNumberLSB + (deviceNumberMSB<<8))
+            result["device_type"]="{}".format(data[11])
+    print(result)
+    return result
 
 
 def main():
