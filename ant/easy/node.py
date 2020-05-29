@@ -59,13 +59,33 @@ class Node():
 
         self._worker_thread = threading.Thread(target=self._worker, name="ant.easy")
         self._worker_thread.start()
+        
+        cap = self.get_capabilities()
+        
+        self.channels = [None]*cap["max_channels"]
 
     def new_channel(self, ctype, network_number=0x00, ext_assign = None):
-        size = len(self.channels)
-        channel = Channel(size, self, self.ant)
-        self.channels[size] = channel
-        channel._assign(ctype, network_number, ext_assign)
-        return channel
+        for i in range(len(self.channels)):
+            if self.channels[i] is None:
+                channel = Channel(i, self, self.ant)
+                self.channels[i] = channel
+                channel._assign(ctype, network_number, ext_assign)
+                return channel
+        _logger.debug("No free channel available")
+        return None
+    
+    def remove_channel(self, channel_id):
+        self.channel[channel_id].close()
+        self.channel[channel_id]._unassign()
+        self.channel[channel_id] = None
+    
+    def get_capabilities(self):
+        data = self.request_message(Message.ID.RESPONSE_CAPABILITIES)
+        if data[1] == 84:
+            return {"max_channels" : data[2][0], "max_networks" : data[2][1], "options" : data[2][2]}
+        else:
+            _logger.debug("capabilities requested and not received (message id 0x{:02x} , but should be 0x{:02x})".format(data[2][4],Message.ID.RESPONSE_CAPABILITIES))
+            return
 
     def request_message(self, messageId):
         _logger.debug("requesting message %#02x", messageId)
