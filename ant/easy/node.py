@@ -75,9 +75,9 @@ class Node():
         return None
     
     def remove_channel(self, channel_id):
-        self.channel[channel_id].close()
-        self.channel[channel_id]._unassign()
-        self.channel[channel_id] = None
+        self.channels[channel_id].close()
+        self.channels[channel_id]._unassign()
+        self.channels[channel_id] = None
     
     def get_capabilities(self):
         data = self.request_message(Message.ID.RESPONSE_CAPABILITIES)
