@@ -62,7 +62,7 @@ class Channel():
 
     def _unassign(self):
         self._ant.unassign_channel(self.id)
-        #return self.wait_for_response(Message.ID.UNASSIGN_CHANNEL)
+        return self.wait_for_response(Message.ID.UNASSIGN_CHANNEL)
 
     def open(self):
         self._ant.open_channel(self.id)
