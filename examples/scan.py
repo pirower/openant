@@ -72,6 +72,8 @@ def main():
         channel.open()
         node.start()
     finally:
+        channel._unassign()
+        channel.close()
         node.stop()
 
 if __name__ == "__main__":
