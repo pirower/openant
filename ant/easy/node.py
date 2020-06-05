@@ -51,7 +51,7 @@ class Node():
 
         self._datas = queue.Queue()
 
-        self.channels = {}
+        #self.channels = {}
 
         self.ant = Ant()
 
@@ -60,7 +60,7 @@ class Node():
         self._worker_thread = threading.Thread(target=self._worker, name="ant.easy")
         self._worker_thread.start()
         
-        cap = self.get_capabilities()
+        self.cap = self.get_capabilities()
         
         self.channels = [None]*cap["max_channels"]
 
