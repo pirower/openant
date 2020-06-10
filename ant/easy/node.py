@@ -62,7 +62,7 @@ class Node():
         
         self.cap = self.get_capabilities()
         
-        self.channels = [None]*cap["max_channels"]
+        self.channels = [None]*self.cap["max_channels"]
 
     def new_channel(self, ctype, network_number=0x00, ext_assign = None):
         for i in range(len(self.channels)):
