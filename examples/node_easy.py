@@ -4,6 +4,7 @@ import collections
 import threading
 import logging
 import datetime
+import time
 
 try:
     # Python 3
@@ -57,62 +58,48 @@ class node_easy(Node):
         channel.open()
     
     def remove_deviceNum(self, deviceNum):
-        try:
-            for i in self.channels:
+        for i in self.channels:
+            try:
                 if i._deviceNum == deviceNum:
                     i.close()
                     i._unassign()
                     i = None
-    
-    def remove_channel(self, channelNum):
-        if self.channels[i] is not None:
-            try:
-                self.channels[i].close()
-                self.channels[i]._unassign()
-                self.channels[i] = None
             except:
                 pass
-            
-    def remove_channel_id(self, id):
-        try:
-            for i in self.channels:
-                if i is not None:
-                    if i.id == id:
-                        i.close()
-                        i._unassign()
-                        i = None
-        except:
-            pass
-            
+    
     def scan(self, deviceType, timeout = 5, callback=None):
-        #8070 for 4 messages/second (~4.06 Hz)
-        #16140 for 2 messages/second (~2.03 Hz)
-        #32280 for 1 message/second (~1.02 Hz)
-        channel = self.new_channel(Channel.Type.BIDIRECTIONAL_RECEIVE,0x00,0x01)
-        channel.set_id(0, deviceType, 0)
-        channel.enable_extended_messages(1)
-        channel.set_search_timeout(0xFF)
-        channel.set_period(8070)
-        channel.set_rf_freq(57)
-        
-        channel.open()
-        
-        def scan_data(data):
-            data_package = {}
-            if len(data)>8:
-                if data[8]==int("0x80",16): #flag byte for extended messages
-                    deviceNumberLSB = data[9]
-                    deviceNumberMSB = data[10]
-                    data_package["device_number"]=deviceNumberLSB + (deviceNumberMSB<<8)
-                    data_package["device_type"]=data[11]
-            return data_package
-        
-        if callback is None:
+        def tmp_scan():
+            #8070 for 4 messages/second (~4.06 Hz)
+            #16140 for 2 messages/second (~2.03 Hz)
+            #32280 for 1 message/second (~1.02 Hz)
+            channel = self.new_channel(Channel.Type.BIDIRECTIONAL_RECEIVE,0x00,0x01)
+            channel.set_id(0, deviceType, 0)
+            channel.enable_extended_messages(1)
+            channel.set_search_timeout(0xFF)
+            channel.set_period(8070)
+            channel.set_rf_freq(57)
+
+            channel.open()
+            channel._devices_found =[]
+
+            def scan_data(data):
+                data_package = {}
+                if len(data)>8:
+                    if data[8]==int("0x80",16): #flag byte for extended messages
+                        deviceNumberLSB = data[9]
+                        deviceNumberMSB = data[10]
+                        data_package["device_number"]=deviceNumberLSB + (deviceNumberMSB<<8)
+                        data_package["device_type"]=data[11]
+                        channel._devices_found.append(data_package)
             channel.on_broadcast_data = scan_data
-        else:
-            channel.on_broadcast_data = callback(scan_data)
+            
+            time.sleep(timeout)
+            
+            if callback is None:
+                callback(channel._devices_found)
+            else:
+                return(channel._devices_found)
+            
+            self.remove_channel(channel.id)
         
-        time.sleep(timeout)
-        
-        
-        
+        t = threading.Thread(name='scan_daemon', target=tmp_scan, daemon=True)
