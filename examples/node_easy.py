@@ -17,6 +17,7 @@ from ant.base.ant import Ant
 from ant.base.message import Message
 from ant.easy.channel import Channel
 from ant.easy.filter import wait_for_event, wait_for_response, wait_for_special
+from ant.easy.node import Node
 
 _logger = logging.getLogger("ant.easy.node")
 
@@ -78,10 +79,8 @@ class node_easy(Node):
             channel.set_search_timeout(0xFF)
             channel.set_period(8070)
             channel.set_rf_freq(57)
-
             channel.open()
             channel._devices_found =[]
-
             def scan_data(data):
                 data_package = {}
                 if len(data)>8:
@@ -103,3 +102,14 @@ class node_easy(Node):
             self.remove_channel(channel.id)
         
         t = threading.Thread(name='scan_daemon', target=tmp_scan, daemon=True)
+
+def main():
+    node = node_easy()
+    NETWORK_KEY= [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
+    node.set_network_key(0x00, NETWORK_KEY)
+    def print_hrm(data):
+        print(data)
+
+    node.add_new_hrm(25170,120,callback=print_hrm)
+    node.channels[0]._deviceNum
+    node.channels[0].on_broadcast_data=print
