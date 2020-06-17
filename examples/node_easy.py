@@ -170,12 +170,16 @@ class node_easy(Node):
         t = threading.Thread(name='scan_daemon', target=tmp_scan, daemon=True)
 
 def main():
-    node = node_easy()
+    n = node_easy()
     NETWORK_KEY= [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
-    node.set_network_key(0x00, NETWORK_KEY)
+    n.set_network_key(0x00, NETWORK_KEY)
     def print_hrm(data):
         print(data)
 
-    node.add_new_hrm(25170,120,callback=print_hrm)
-    node.channels[0]._deviceNum
-    node.channels[0].on_broadcast_data=print
+    n.add_new_hrm(25170,120,callback=print_hrm)
+    n.start()
+    n.channels[0]._deviceNum
+    n.channels[0].on_broadcast_data=print
+
+if __name__ == "__main__":
+    main()
