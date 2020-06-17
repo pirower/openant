@@ -115,13 +115,16 @@ class node_easy(Node):
                     deviceNumberMSB = data[10]
                     data_package["device_number"]=deviceNumberLSB + (deviceNumberMSB<<8)
                     data_package["device_type"]=data[11]
-            return data_package
+            if callback is None:
+                print(data_package)
+            else:
+                try:
+                    callback(data_package)
+                except:
+                    pass
         
-        if callback is None:
-            channel.on_broadcast_data = hrm_data
-        else:
-            channel.on_broadcast_data = callback(hrm_data)
-        
+        channel.on_broadcast_data = hrm_data
+                
         channel.open()
     
     def remove_deviceNum(self, deviceNum):
