@@ -43,6 +43,40 @@ class node_easy(Node):
                             "heart_beat_count":data[6], #256 counts
                             "computed_heart_rate":data[7], # 1-255
                             "time_stamp":datetime.datetime.now()}
+            if data_packgae["data_page"] == 1:
+                # Increments every 2 seconds and is reset on battery replacement.
+                # Rollover every 33554430s
+                data_packgae["cumulative_operating_time"] = (data[1] + (data[2]<<8)+(data[3]<<16))*2 #in seconds
+            if data_packgae["data_page"] == 2:
+                data_packgae["manufacturer_ID"] = data[1]
+                data_packgae["serial_number"] = data[2]+(data[3]<<8)
+            if data_packgae["data_page"] == 3:
+                data_packgae["hardware_version"] = data[1]
+                data_packgae["software_version"] = data[2]
+                data_packgae["model_number"] = data[3]
+            if data_packgae["data_page"] == 4:
+                data_packgae["manufacturer_specific"] = data[1]
+                #Represents the time of the previous valid heart beat event., units 1/1024 second, roll over 63.999s (~64s)
+                data_packgae["previous_heart_beat_event_time"] = (data[2] + (data[3]<<8))/1024 #in seconds
+            if data_packgae["data_page"] == 5:
+                data_packgae["interval_average_heart_rate"] = data[1] # in bpm
+                data_packgae["interval_maximum_heart_rate"] = data[2] # in bpm
+                data_packgae["session_average_heart_rate"] = data[3] # in bpm
+            if data_packgae["data_page"] == 7:
+                data_packgae["battery_level"] = data[1] # in %
+                data_packgae["fractional_battery_voltage"] = data[2]/256 # in V
+                data_packgae["coarse_battery_voltage"] = data[3] >> 0 & 4 # in V
+                battery_status = data[3] >> 4 & 3 # in bpm
+                if battery_status == 1:
+                    data_packgae["battery_status"] = "New"
+                if battery_status == 2:
+                    data_packgae["battery_status"] = "Good"
+                if battery_status == 3:
+                    data_packgae["battery_status"] = "Ok"
+                if battery_status == 4:
+                    data_packgae["battery_status"] = "Low"
+                if battery_status == 5:
+                    data_packgae["battery_status"] = "Critical"
             if len(data)>8:
                 if data[8]==int("0x80",16): #flag byte for extended messages
                     deviceNumberLSB = data[9]
