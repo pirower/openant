@@ -38,7 +38,7 @@ class node_easy(Node):
         
         def hrm_data(data):
             heartrate = data[7]
-            data_package = {"data_page":data[0],
+            data_package = {"data_page":data[0] >> 0 & 7,
                             "heart_beat_event_time":data[4]+(data[5]<<8),# 1/1024 second
                             "heart_beat_count":data[6], #256 counts
                             "computed_heart_rate":data[7], # 1-255
