@@ -108,7 +108,7 @@ class node_easy(Node):
                         data_package["battery_status"] = "invalid"
                 else:
                     data_package["battery_voltage"] = "invalid"
-                    data_package["battery_level"] = "not used
+                    data_package["battery_level"] = "not used"
             if len(data)>8:
                 if data[8]==int("0x80",16): #flag byte for extended messages
                     deviceNumberLSB = data[9]
