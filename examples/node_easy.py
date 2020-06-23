@@ -137,6 +137,9 @@ class node_easy(Node):
             except:
                 pass
     
+    def start(self):
+        threading.Thread(target=self._main, name="_main")
+        
     def scan(self, deviceType, timeout = 5, callback=None):
         def tmp_scan():
             #8070 for 4 messages/second (~4.06 Hz)
