@@ -179,7 +179,7 @@ def main():
     def print_hrm(data):
         print(data)
 
-    n.add_new_hrm(25170,120,callback=print_hrm)
+    n.add_new_hrm(25170,callback=print_hrm)
     n.start()
     n.channels[0]._deviceNum
     n.channels[0].on_broadcast_data=print
