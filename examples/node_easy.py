@@ -138,8 +138,17 @@ class node_easy(Node):
                 pass
     
     def start(self):
-        threading.Thread(target=self._main, name="_main")
-        
+        self._main_thread = threading.Thread(target=self._main, name="_main")
+        self._main_thread.start()
+    
+    def stop(self):
+        if self._running:
+            _logger.debug("Stoping ant.easy")
+            self._running = False
+            self.ant.stop()
+            self._worker_thread.join()
+            self._main_thread.join()
+    
     def scan(self, deviceType, timeout = 5, callback=None):
         def tmp_scan():
             #8070 for 4 messages/second (~4.06 Hz)
