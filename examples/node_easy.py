@@ -22,7 +22,6 @@ from ant.easy.node import Node
 _logger = logging.getLogger("ant.easy.node")
 
 class node_easy(Node):
-    
     def add_new_hrm(self, deviceNum=0, messagePeriod=32280, callback=None):
         #8070 for 4 messages/second (~4.06 Hz)
         #16140 for 2 messages/second (~2.03 Hz)
@@ -35,7 +34,6 @@ class node_easy(Node):
         channel.set_search_timeout(0xFF) #Timeout Never
         channel.set_period(messagePeriod)
         channel.set_rf_freq(57)
-        
         def hrm_data(data):
             heartrate = data[7]
             data_package = {"data_page":data[0] >> 0 & 7,
@@ -122,25 +120,20 @@ class node_easy(Node):
                     callback(data_package)
                 except:
                     pass
-        
         channel.on_broadcast_data = hrm_data
-                
         channel.open()
-    
     def remove_deviceNum(self, deviceNum):
-        for i in self.channels:
+        for i in range(len(self.channels)):
             try:
-                if i._deviceNum == deviceNum:
-                    i.close()
-                    i._unassign()
-                    i = None
+                if self.channels[i]._deviceNum == deviceNum:
+                    self.channels[i].close()
+                    self.channels[i]._unassign()
+                    self.channels[i] = None
             except:
                 pass
-    
     def start(self):
         self._main_thread = threading.Thread(target=self._main, name="_main")
         self._main_thread.start()
-    
     def stop(self):
         if self._running:
             _logger.debug("Stoping ant.easy")
@@ -148,7 +141,6 @@ class node_easy(Node):
             self.ant.stop()
             self._worker_thread.join()
             self._main_thread.join()
-    
     def scan(self, deviceType, timeout = 5, callback=None):
         def tmp_scan():
             #8070 for 4 messages/second (~4.06 Hz)
@@ -163,6 +155,7 @@ class node_easy(Node):
             channel.open()
             channel._devices_found =[]
             def scan_data(data):
+                print("Hallo")
                 data_package = {}
                 if len(data)>8:
                     if data[8]==int("0x80",16): #flag byte for extended messages
@@ -172,17 +165,16 @@ class node_easy(Node):
                         data_package["device_type"]=data[11]
                         channel._devices_found.append(data_package)
             channel.on_broadcast_data = scan_data
-            
+            channel.on_burst_data = scan_data
+            channel.on_acknowledge = scan_data
             time.sleep(timeout)
-            
             if callback is None:
-                callback(channel._devices_found)
+                print(channel._devices_found)
             else:
-                return(channel._devices_found)
-            
+                callback(channel._devices_found)
             self.remove_channel(channel.id)
-        
-        t = threading.Thread(name='scan_daemon', target=tmp_scan, daemon=True)
+        t = threading.Thread(name='scan_daemon', target=tmp_scan)
+        t.start()
 
 def main():
     n = node_easy()
@@ -190,9 +182,11 @@ def main():
     n.set_network_key(0x00, NETWORK_KEY)
     def print_hrm(data):
         print(data)
-
-    n.add_new_hrm(25170,callback=print_hrm)
     n.start()
+    n.scan(120)
+    n.add_new_hrm(25170,callback=print_hrm)
+    time.sleep(10)
+    n.remove_deviceNum(25170)
     n.channels[0]._deviceNum
     n.channels[0].on_broadcast_data=print
 
