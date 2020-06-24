@@ -75,15 +75,14 @@ class Node():
         return None
     
     def remove_channel(self, channel_id):
-        try:
-            for i in self.channels:
-                if i is not None:
-                    if i.id == channel_id:
-                        i.close()
-                        i._unassign()
-                        i = None
-        except:
-            pass
+        for i in range(len(self.channels)):
+            try:
+                if self.channels[i].id == channel_id:
+                    self.channels[i].close()
+                    self.channels[i]._unassign()
+                    self.channels[i] = None
+            except:
+                pass
     
     def get_capabilities(self):
         data = self.request_message(Message.ID.RESPONSE_CAPABILITIES)
