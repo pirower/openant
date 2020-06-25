@@ -155,7 +155,6 @@ class node_easy(Node):
             channel.open()
             channel._devices_found =[]
             def scan_data(data):
-                print("Hallo")
                 data_package = {}
                 if len(data)>8:
                     if data[8]==int("0x80",16): #flag byte for extended messages
