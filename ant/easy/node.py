@@ -51,8 +51,6 @@ class Node():
 
         self._datas = queue.Queue()
 
-        #self.channels = {}
-
         self.ant = Ant()
 
         self._running = True
@@ -86,8 +84,9 @@ class Node():
     
     def get_capabilities(self):
         data = self.request_message(Message.ID.RESPONSE_CAPABILITIES)
-        if data[1] == 84:
-            return {"max_channels" : data[2][0], "max_networks" : data[2][1], "options" : data[2][2]}
+        if data[1] == Message.ID.RESPONSE_CAPABILITIES:
+            return {"max_channels" : data[2][0], "max_networks" : data[2][1], "standard_options" : data[2][2], "advanced_options" : data[2][3], 
+                    "advanced_options2" : data[2][4], , "max_sensrcore_channels": data[2][5], "advanced_options3" : data[2][6], "advanced_options4" : data[2][7]}
         else:
             _logger.debug("capabilities requested and not received (message id 0x{:02x} , but should be 0x{:02x})".format(data[2][4],Message.ID.RESPONSE_CAPABILITIES))
             return
