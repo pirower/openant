@@ -109,7 +109,6 @@ def main():
         channel_scan._unassign()
         channel_hrm.open()
         channel_hrm2.open()
-        #channel_scan.open()
         node.start()
     finally:
         channel_hrm.close()
